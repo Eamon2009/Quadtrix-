@@ -9,7 +9,23 @@ The implementation starts from a very simple language model (Bigram) and gradual
 This project is inspired by the tutorial by Andrej Karpathy:
 "Let's build GPT: from scratch, in code, spelled out".
 
-However, the goal here is **learning and reimplementation**, not copying the original code.
+However, the goal here is **learning and reimplementation**
+---
+## Scaling Laws in Language Models
+
+<img width="1029" height="705" alt="Screenshot 2026-03-17 171921" src="https://github.com/user-attachments/assets/ee00469a-e0ed-4247-92d4-ff606a1535bf" />
+
+
+This figure illustrates the relationship between **compute used during training** and **validation loss** in large language models. As the amount of compute and model parameters increase, the validation loss decreases following a predictable power-law trend.
+
+The colored curves represent models with different parameter sizes, while the dashed line shows the empirical scaling law:
+
+L = 2.57 · C^-0.048
+
+where **L** is the validation loss and **C** represents the compute used during training.
+
+This result highlights an important principle in modern AI systems: increasing model size, data, and compute tends to improve performance in a predictable way.
+
 
 ---
 
@@ -186,7 +202,7 @@ Instead of using large frameworks directly, this project focuses on learning the
 
 # Acknowledgment
 
-This project is inspired by the educational work of Andrej Karpathy and his tutorial:
+This project is inspired by the educational work of ``Andrej Karpathy`` and his tutorial:
 
 "Let's build GPT: from scratch, in code, spelled out".
 
@@ -199,9 +215,13 @@ This repository represents my own implementation created while learning these co
 Planned improvements include:
 
 • larger datasets
+
 • better tokenizer
+
 • larger transformer architecture
+
 • improved training pipeline
+
 • experimentation with different model sizes
 
 ---
