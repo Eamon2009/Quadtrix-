@@ -6,44 +6,42 @@ import time
 from config.config import *
 
 start = time.time()
+# hyperparameters
+batch_size = 16 # how many independent sequences will we process in parallel?
+block_size = 32 # what is the maximum context length for predictions?
+max_iters = 5000
+eval_interval = 100
+learning_rate = 1e-3
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+eval_iters = 200
+n_embd = 64
+n_head = 4
+n_layer = 4
+dropout = 0.0
+# ------------
 
 with open(data_path, 'r', encoding='utf-8') as f:
     text = f.read()
-
-# keep alphabets, spaces, and newline
-text = re.sub(r"[^A-Za-z\s\n]", " ", text)
-
-# clean extra spaces but keep line structure
-text = re.sub(r"[ ]+", " ", text)
-
-# convert to lowercase
-text = text.lower()
-
+text = re.sub(r"[^A-Za-z\s\n]", " ", text)  # keep alphabets, spaces, and newline
+text = re.sub(r"[ ]+", " ", text)           # clean extra spaces but keep line structure
+text = text.lower()                         # convert to lowercase
 with open(cleaned_path, "w", encoding="utf-8") as f:
     f.write(text)
-
-print("cleaning complete")
-
 with open(cleaned_path, 'r', encoding='utf-8') as f:
     text2 = f.read()
 
 chars2 = sorted(list(set(text2)))
 vocab_size = len(chars2)
-
 stri = {ch: i for i, ch in enumerate(chars2)}
 it   = {i: ch for i, ch in enumerate(chars2)}
-
-encode = lambda s: [stri[c] for c in s]  # a function that take a string triverse it and return a integer list
+encode = lambda s: [stri[c] for c in s]         # a function that take a string triverse it and return a integer list
 decode = lambda l: ''.join([it[i] for i in l])  # a function that convert the
 
-print(encode("eamon"))
-print(decode(encode("eamon")))
-
 data = torch.tensor(encode(text2), dtype=torch.long)
-print(data.dtype, data.shape)
+# print(data.dtype, data.shape)
 
 # now split the data into train data and validation data
-n          = int(train_split * len(data))
+n = int(train_split * len(data))
 train_data = data[:n]
 val_data   = data[n:]
 
@@ -54,7 +52,7 @@ b = train_data[1:block_size + 1]
 for t in range(block_size):
     context = a[:t + 1]
     target  = b[t]
-    print(f"Input:{context},target:{target}")
+    # print(f"Input:{context},target:{target}")
 
 torch.manual_seed(seed)
 
@@ -67,20 +65,12 @@ def get_batch(split):
     x  = torch.stack([data[i:i + block_size]     for i in ix])
     y  = torch.stack([data[i + 1:i + block_size + 1] for i in ix])
     return x, y
-
 xb, yb = get_batch('train')
-print('inputs:')
-print(xb.shape)
-print(xb)
-print('targets:')
-print(yb.shape)
-print(yb)
-
 for b in range(batch_size):
     for t in range(block_size):
         context = xb[b, :t + 1]
         target  = yb[b, t]
-        print(f"context:{context} and target:{target} ")
+        # print(f"context:{context} and target:{target} ")
 
 torch.manual_seed(seed)
 
@@ -88,8 +78,7 @@ class BigramLanguageModel(nn.Module):
 
     def __init__(self, vocab_size):
         super().__init__()
-        # each token directly reads off the logits for the next token from a lookup table
-        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)
+        self.token_embedding_table = nn.Embedding(vocab_size, vocab_size)  # each token directly reads off the logits for the next token from a lookup table
 
     def forward(self, idx, targets=None):
 
@@ -107,25 +96,46 @@ class BigramLanguageModel(nn.Module):
         return logits, loss
 
     def generate(self, idx, max_new_tokens):
-        # idx is (B, T) array of indices in the current context
         for _ in range(max_new_tokens):
-            # get the predictions
-            logits, loss = self(idx)
-            # focus only on the last time step
-            logits = logits[:, -1, :]  # becomes (B, C)
-            # apply softmax to get probabilities
-            probs = F.softmax(logits, dim=-1)  # (B, C)
-            # sample from the distribution
-            idx_next = torch.multinomial(probs, num_samples=1)  # (B, 1)
-            # append sampled index to the running sequence
-            idx = torch.cat((idx, idx_next), dim=1)  # (B, T+1)
+            logits, loss = self(idx)                             # get the predictions
+            logits = logits[:, -1, :]                            # becomes (B, C)
+            probs = F.softmax(logits, dim=-1)                    # (B, C) softmax to get probabilities
+            idx_next = torch.multinomial(probs, num_samples=1)   # sample from the distribution(B, 1)
+            idx = torch.cat((idx, idx_next), dim=1)              # append sampled index to the running sequence(B, T+1)
         return idx
 
 m = BigramLanguageModel(vocab_size)
 logits, loss = m(xb, yb)
-print(logits.shape)
-print(loss)
-print(decode(m.generate(idx=torch.zeros((1, 1), dtype=torch.long), max_new_tokens=100)[0].tolist()))
 
+@torch.no_grad()
+def estimate_loss():
+    out = {}
+    m.eval()
+    for split in ['train', 'val']:
+        losses = torch.zeros(eval_iters)
+        for k in range(eval_iters):
+            X, Y = get_batch(split)
+            logits, loss = m(X, Y)
+            losses[k] = loss.item()
+        out[split] = losses.mean()
+    m.train()
+    return out
+
+# Adding a Py torch optimizer 
+optimizer = torch.optim.AdamW(m.parameters(), lr=1e-3)
+# Training loop
+batch_size = 32
+for steps in range(10000):
+    if steps % eval_interval == 0:
+        losses = estimate_loss()
+        print(f"step {steps}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+    xb, yb = get_batch('train')
+    logits, loss = m(xb, yb)
+    optimizer.zero_grad(set_to_none=True)
+    loss.backward()
+    optimizer.step()
+
+context = torch.zeros((1, 1), dtype=torch.long, device=device)
+print(decode(m.generate(idx=torch.zeros((1, 1), dtype=torch.long), max_new_tokens=1000)[0].tolist()))
 end = time.time()
 print("The time taken :", end - start)
