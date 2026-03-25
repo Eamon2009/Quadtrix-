@@ -1,6 +1,6 @@
 import torch
 import os
-from test import GPTLanguageModel
+from GPU_test import GPTLanguageModel
 
 # 1. Setup
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
