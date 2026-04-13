@@ -1,4 +1,6 @@
 # Transformer Language Model [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Zs84ZQf-0VPbQxHce1mlSMD-Jr22xJqZ#scrollTo=VdohdZ8imygv) ![GitHub](https://img.shields.io/github/license/Eamon2009/Transformer-language-model)
+<img width="425" height="311" alt="image" src="https://github.com/user-attachments/assets/1c9f152d-5281-4640-b587-0014f2eb8464" />
+
 
 A character-level GPT transformer built from scratch in PyTorch, trained on children's stories to generate simple English narrative text character by character. No pre-trained weights. No fine-tuning. Pure architecture and training from zero.
 
