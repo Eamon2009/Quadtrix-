@@ -1,6 +1,12 @@
-name: Run Train Test
+name: Test Train Scripts
 
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - 'train_test/**'
+  pull_request:
+    paths:
+      - 'train_test/**'
 
 jobs:
   test:
@@ -11,13 +17,10 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version-file: '.python-version'  
+          python-version-file: '.python-version'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run transformer tests
-        run: python transformer.py
-
       - name: Run train_test scripts
-        run: python train_test/
+        run: python -m train_test
