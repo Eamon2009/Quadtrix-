@@ -1,10 +1,9 @@
 # Virtual environments
 .venv
-
-.env
+eamon_env
 __pycache__
 best_model.pt
 .ipynb_checkpoints
-*.exe
+.exe
 
 
