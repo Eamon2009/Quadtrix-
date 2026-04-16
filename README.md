@@ -338,6 +338,8 @@ All gaps are tiny. **No overfitting detected.** The model is generalizing well t
 ---
 
 ## Scaling Laws: Where Quadtrix Sits
+<img width="1029" height="705" alt="Screenshot 2026-03-17 171921" src="https://github.com/user-attachments/assets/1fa78e9d-520d-4227-972e-368bad354968" />
+
 
 The Chinchilla (2022) scaling law suggests: **~20 tokens of training data per parameter is optimal**.
 
