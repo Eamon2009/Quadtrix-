@@ -41,7 +41,7 @@ print(f"  dropout       : {dropout}")
 
 torch.manual_seed(seed)
 
-# ── Data loading ───────────────────────────────────────────
+# ---- Data loading --------------------------------
 print(f"\n[DATA]  {'─' * 40}")
 print(f"  loading       : {cleaned_path}")
 with open(cleaned_path, 'r', encoding='utf-8') as f:
@@ -65,7 +65,7 @@ print(f"  train tokens  : {len(train_data):,}")
 print(f"  val tokens    : {len(val_data):,}")
 
 
-# ── Batch / loss helpers ───────────────────────────────────
+# --- Batch / loss helpers -------------------------
 def get_batch(split):
     data = train_data if split == 'train' else val_data
     ix   = torch.randint(len(data) - block_size, (batch_size,))
@@ -90,7 +90,7 @@ def estimate_loss():
     return out
 
 
-# ── Model ──────────────────────────────────────────────────
+#  Model-----------------------------------------
 class Head(nn.Module):
     def __init__(self, head_size):
         super().__init__()
@@ -199,7 +199,7 @@ class GPTLanguageModel(nn.Module):
         return idx
 
 
-# ── Build model ────────────────────────────────────────────
+#  Build model ------------------------------
 print(f"\n[MODEL] {'─' * 40}")
 model    = GPTLanguageModel().to(device)
 n_params = sum(p.numel() for p in model.parameters())
@@ -213,7 +213,7 @@ print(f"  optimizer     : AdamW")
 print(f"  lr            : {learning_rate:.2e}")
 
 
-# ── Training loop ──────────────────────────────────────────
+# ── Training loop ─0--------------------------------
 print(f"\n{SEP}")
 print(f"  TRAINING  ·  {max_iters:,} iters  ·  eval every {eval_interval}")
 print(f"{SEP}")
@@ -256,7 +256,7 @@ print(f"  weights saved : best_model.pt")
 print(SEP)
 
 
-# ── Infinite generation in same terminal ───────────────────
+# ── Infinite generation in same terminal ------------
 print(f"\n[GEN]   {'─' * 40}")
 print(f"  streaming output  ·  Ctrl+C to stop")
 print(f"{'─' * 60}\n")
